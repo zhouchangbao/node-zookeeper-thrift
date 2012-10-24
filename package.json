@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "description": "Zookeeper/Thrift implementation",
   "main": "zkt.js",
+  "repository" : { 
+    "type" : "git",
+    "url" : "http://github.com/braitz/node-zookeeper-thrift.git"
+  },
   "scripts" : {
     "test"  : "mocha --ui bdd --reporter spec --ignore-leaks --recursive"
   },
