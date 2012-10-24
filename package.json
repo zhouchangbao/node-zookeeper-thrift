@@ -1,0 +1,21 @@
+{
+  "name": "node-zookeeper-thrift",
+  "version": "0.0.1",
+  "description": "Zookeeper/Thrift implementation",
+  "main": "zkt.js",
+  "scripts" : {
+    "test"  : "mocha --ui bdd --reporter spec --ignore-leaks --recursive"
+  },
+  "dependencies": {
+    "zookeeper": "3.4.1-4",
+    "thrift": "0.7.0",
+    "async": "0.1.22",
+    "underscore": "1.4.2"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*",
+    "sinon": "1.4.2",
+    "expect.js": "0.1.2"
+  }
+}
