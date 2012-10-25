@@ -25,6 +25,31 @@ function format(childNodes, data, callback) {
   callback(null, result);
 }
 
+
+/**
+  Return handle to a function that will read the zookeeper node for given path, 
+  deserialize it if thriftClient available, and futher format the result if formatter
+  function
+*/
+function readFn(zkInstance, fullPath, thriftClient, formatter) {
+  var fn = function(cb) {
+    zk.readNode(zkInstance, fullPath, function(err, value) {
+      if (err) return cb(err);
+      if (!thriftClient) return cb(null, value);
+
+      // if thrift client available, parse data
+      thrift.parseThrift(thriftClient, value, function(err, data) {
+        // if formatter, available, additionally format the data
+        if (formatter && !err && data) {
+          data = formatter(data);
+        }
+        return cb(err, data);
+      });
+    });
+  }
+  return fn;
+}
+
 /**
   Read each child node.  Deserialize if thrift client available.
 */
@@ -42,21 +67,7 @@ function read(zkInstance, childNodes, schema, callback){
         schema[path].formatter : null;
 
       // for each child node, create function that will read it
-      batched[fullPath] = function(cb) {
-        zk.readNode(zkInstance, fullPath, function(err, value) {
-          if (err) return cb(err);
-          if (!thriftClient) return cb(null, value);
-
-          // if thrift client available, parse data
-          thrift.parseThrift(thriftClient, value, function(err, data) {
-            // if formatter, available, additionally format the data
-            if (formatter && !err && data) {
-              data = formatter(data);
-            }
-            return cb(err, data);
-          });
-        });
-      }
+      batched[fullPath] = readFn(zkInstance, fullPath, thriftClient, formatter);
 
     })
   });
