@@ -38,20 +38,26 @@ function read(zkInstance, childNodes, schema, callback){
       fullPath = path + '/' + child;
       thriftClient = (schema && schema[path] && schema[path].thriftClient) ? 
         schema[path].thriftClient : null;
+      formatter = (schema && schema[path] && schema[path].formatter) ? 
+        schema[path].formatter : null;
 
       // for each child node, create function that will read it
       batched[fullPath] = function(cb) {
         zk.readNode(zkInstance, fullPath, function(err, value) {
-          if (err) {
-            return cb(err);
-          } else if (thriftClient) {
-            // if thrift client available, parse data
-            thrift.parseThrift(thriftClient, value, cb);
-          } else {
-            cb(null, value);
-          }
+          if (err) return cb(err);
+          if (!thriftClient) return cb(null, value);
+
+          // if thrift client available, parse data
+          thrift.parseThrift(thriftClient, value, function(err, data) {
+            // if formatter, available, additionally format the data
+            if (formatter && !err && data) {
+              data = formatter(data);
+            }
+            return cb(err, data);
+          });
         });
       }
+
     })
   });
 
@@ -81,7 +87,10 @@ module.exports.init = function(serverOptions, options) {
   Fetch data given server and schema
   - server: "testserver.com:2181"
   - schema: {
-      '/path/to/zookeeperService/one': {thriftClient: <point-to-generated-thrift-client-class>},
+      '/path/to/zookeeperService/one': {
+          thriftClient: <point-to-generated-thrift-client-class>,
+          formatter: function(data) { return(formatted-data)}
+      },
       '/path/to/zookeeperService/two': {thriftClient: <point-to-generated-thrift-client-class>}
   }
 

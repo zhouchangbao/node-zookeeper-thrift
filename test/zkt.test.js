@@ -74,5 +74,30 @@ describe('fetch', function() {
     });
   });
 
+  it('should fetch schema paths from server and format', function() {
+    // create formatter function
+    var formatterFn = function(data) {
+      if (data && data.serviceEndpoint) {
+        return data.serviceEndpoint;
+      }
+      return data;
+    }
+    // associate thrift client and formatter with path
+    var anotherSchema = {
+      "/path/to/service/one": {thriftClient: thriftClient, formatter:formatterFn}
+    }
+
+    zkt.fetch(server, anotherSchema, function(err, results) {
+      if (err) {
+        throw err;
+      }
+      _.isEqual( _.keys(results), [ '/path/to/service/one' ]).should.be.true
+     
+      var child1 = results['/path/to/service/one']['child1'];
+      child1.host.should.equal("10.100.145.81");
+      child1.port.should.equal(4567);
+    });
+  });
+
 });
 
