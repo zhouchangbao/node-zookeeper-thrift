@@ -1,6 +1,6 @@
 {
   "name": "node-zookeeper-thrift",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Zookeeper/Thrift implementation",
   "main": "zkt.js",
   "repository" : { 
